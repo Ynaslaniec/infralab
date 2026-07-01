@@ -10,6 +10,41 @@ function validatePhone(phone: string): boolean {
   return /^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/.test(phone.replace(/\s/g, ''));
 }
 
+type InfoKey = 'privacy' | 'help' | 'terms';
+
+const INFO_CONTENT: Record<InfoKey, { title: string; icon: React.ElementType; body: string[] }> = {
+  privacy: {
+    title: 'Privacidade',
+    icon: Shield,
+    body: [
+      'O InfraLab coleta apenas os dados necessários para o funcionamento do sistema: nome, e-mail institucional, telefone, departamento e histórico de uso (agendamentos e chamados).',
+      'Seus dados são armazenados de forma segura e o acesso é restrito de acordo com o seu perfil (Professor, Técnico ou Coordenador).',
+      'Você pode solicitar a atualização ou remoção dos seus dados a qualquer momento entrando em contato com a coordenação.',
+    ],
+  },
+  help: {
+    title: 'Central de Ajuda',
+    icon: HelpCircle,
+    body: [
+      'Precisa de ajuda para usar o InfraLab? Aqui estão algumas dicas rápidas:',
+      '• Para reservar um equipamento, laboratório, sala ou auditório, acesse "Agendamentos" e toque no botão "+".',
+      '• Para relatar um problema técnico, acesse "Chamados" e toque no botão "+".',
+      '• Acompanhe o status do seu chamado e converse com o técnico responsável diretamente pelo chat.',
+      'Caso o problema persista, entre em contato com a equipe de suporte pelo e-mail suporte@infralab.edu.br.',
+    ],
+  },
+  terms: {
+    title: 'Termos de Uso',
+    icon: FileText,
+    body: [
+      'Ao utilizar o InfraLab, você concorda em fornecer informações verídicas e utilizar os recursos institucionais de forma responsável.',
+      'É proibido o uso indevido de equipamentos, espaços e funcionalidades do sistema, bem como o compartilhamento de credenciais de acesso.',
+      'A instituição reserva-se o direito de suspender o acesso de usuários que descumprirem estes termos.',
+      'Estes termos podem ser atualizados periodicamente; recomendamos a revisão ocasional desta página.',
+    ],
+  },
+};
+
 export default function Profile() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -22,6 +57,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
 
   const [stats, setStats] = useState({ appointments: 0, tickets: 0, labs: 0 });
+  const [infoModal, setInfoModal] = useState<InfoKey | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -165,7 +201,10 @@ export default function Profile() {
         <div>
           <h3 className="text-[16px] font-semibold text-foreground mb-3 px-1">Configurações</h3>
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            <button className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors border-b border-border">
+            <button
+              onClick={() => navigate('/notifications')}
+              className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors border-b border-border"
+            >
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-foreground" />
                 <span className="text-[14px] text-foreground font-medium">Notificações</span>
@@ -187,7 +226,10 @@ export default function Profile() {
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </div>
             </button>
-            <button className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+            <button
+              onClick={() => setInfoModal('privacy')}
+              className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <Shield className="w-5 h-5 text-foreground" />
                 <span className="text-[14px] text-foreground font-medium">Privacidade</span>
@@ -201,14 +243,20 @@ export default function Profile() {
         <div>
           <h3 className="text-[16px] font-semibold text-foreground mb-3 px-1">Suporte</h3>
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            <button className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors border-b border-border">
+            <button
+              onClick={() => setInfoModal('help')}
+              className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors border-b border-border"
+            >
               <div className="flex items-center gap-3">
                 <HelpCircle className="w-5 h-5 text-foreground" />
                 <span className="text-[14px] text-foreground font-medium">Central de Ajuda</span>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </button>
-            <button className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+            <button
+              onClick={() => setInfoModal('terms')}
+              className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-foreground" />
                 <span className="text-[14px] text-foreground font-medium">Termos de Uso</span>
@@ -247,6 +295,34 @@ export default function Profile() {
 
         <p className="text-center text-[12px] text-muted-foreground">InfraLab v1.0.0 • © 2026</p>
       </div>
+
+      {/* Modal genérico — Privacidade / Central de Ajuda / Termos de Uso */}
+      {infoModal && (
+        <div
+          onClick={() => setInfoModal(null)}
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-0 sm:px-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-card">
+              <div className="flex items-center gap-3">
+                {(() => { const Icon = INFO_CONTENT[infoModal].icon; return <Icon className="w-5 h-5 text-foreground" />; })()}
+                <h2 className="text-[17px] font-semibold text-foreground">{INFO_CONTENT[infoModal].title}</h2>
+              </div>
+              <button onClick={() => setInfoModal(null)} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3">
+              {INFO_CONTENT[infoModal].body.map((line, i) => (
+                <p key={i} className="text-[14px] text-foreground leading-relaxed">{line}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

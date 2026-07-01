@@ -4,16 +4,25 @@ import { useNavigate } from 'react-router';
 import { StatusBadge } from '../components/StatusBadge';
 import { supabase, Appointment, Ticket } from '../../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useRole } from '../hooks/useRole';
 
-const quickActions = [
-  { id: 'equipment', title: 'Agendar\nEquipamento', icon: Laptop, color: '#2563EB', path: '/equipment' },
-  { id: 'lab', title: 'Reservar\nEspaço', icon: FlaskConical, color: '#16A34A', path: '/spaces' },
-  { id: 'report', title: 'Relatar\nProblema', icon: AlertCircle, color: '#DC2626', path: '/report' },
+const BASE_ACTIONS = [
+  { id: 'equipment', title: 'Agendar\nEquipamento',  icon: Laptop,       color: '#2563EB', path: '/equipment' },
+  { id: 'lab',       title: 'Reservar\nEspaço',      icon: FlaskConical, color: '#16A34A', path: '/spaces'    },
+  { id: 'report',    title: 'Relatar\nProblema',      icon: AlertCircle,  color: '#DC2626', path: '/report'    },
+];
+
+const COORD_ACTIONS = [
+  { id: 'equipment', title: 'Gerenciar\nEquipamentos', icon: Laptop,       color: '#2563EB', path: '/equipment' },
+  { id: 'lab',       title: 'Gerenciar\nEspaços',      icon: FlaskConical, color: '#16A34A', path: '/spaces'    },
+  { id: 'report',    title: 'Relatar\nProblema',        icon: AlertCircle,  color: '#DC2626', path: '/report'    },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
+  const { isCoordenador } = useRole();
+  const quickActions = isCoordenador ? COORD_ACTIONS : BASE_ACTIONS;
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -128,7 +137,14 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-3">
               {appointments.map((a) => (
-                <div key={a.id} className="p-4 bg-card border border-border rounded-xl hover:shadow-sm transition-all">
+                <div
+                  key={a.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate('/appointments')}
+                  onKeyDown={(e) => { if (e.key === 'Enter') navigate('/appointments'); }}
+                  className="p-4 bg-card border border-border rounded-xl hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                >
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${a.type === 'equipment' ? 'bg-[#2563EB]/10' : 'bg-[#16A34A]/10'}`}>
                       {a.type === 'equipment'
@@ -174,7 +190,14 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-3">
               {tickets.map((t) => (
-                <div key={t.id} className="p-4 bg-card border border-border rounded-xl hover:shadow-sm transition-all">
+                <div
+                  key={t.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/tickets/${t.id}/chat`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/tickets/${t.id}/chat`); }}
+                  className="p-4 bg-card border border-border rounded-xl hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-3 flex-1">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${t.status === 'resolved' ? 'bg-[#16A34A]/10' : 'bg-[#EAB308]/10'}`}>

@@ -134,14 +134,6 @@ export default function Equipment() {
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <h1 className="text-[20px] font-semibold text-foreground flex-1">Equipamentos</h1>
-            {isCoordenador && (
-              <button
-                onClick={() => setFormTarget('new')}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#2563EB] hover:bg-[#3B82F6] text-white rounded-xl text-[13px] font-medium transition-colors"
-              >
-                <Plus className="w-4 h-4" /> Novo
-              </button>
-            )}
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -237,6 +229,21 @@ export default function Equipment() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button — Novo Equipamento (somente Coordenador) */}
+      {isCoordenador && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+          <div className="max-w-md mx-auto relative h-0">
+            <button
+              onClick={() => setFormTarget('new')}
+              aria-label="Novo Equipamento"
+              className="absolute bottom-24 right-6 w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#3B82F6] text-white shadow-lg flex items-center justify-center transition-colors pointer-events-auto"
+            >
+              <Plus className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

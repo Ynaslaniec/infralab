@@ -3,7 +3,14 @@
     "allow": [
       "mcp__77ff165e-460d-418d-a272-327442c487ce__list_projects",
       "mcp__77ff165e-460d-418d-a272-327442c487ce__execute_sql",
-      "mcp__77ff165e-460d-418d-a272-327442c487ce__get_publishable_keys"
+      "mcp__77ff165e-460d-418d-a272-327442c487ce__get_publishable_keys",
+      "Bash(ls \"C:\\\\Users\\\\samsu\\\\Downloads\\\\\" | grep -i artigo)",
+      "Bash(pandoc --track-changes=all \"Artigo_InfraLab- YuriNaslaniec e Luis Guustavo4.docx\" -o artigo2.md)",
+      "PowerShell(pandoc --track-changes=all \"C:\\\\Users\\\\samsu\\\\Downloads\\\\Artigo_InfraLab- YuriNaslaniec e Luis Guustavo4.docx\" -o \"C:\\\\Users\\\\samsu\\\\Downloads\\\\artigo2.md\")",
+      "Bash(npx tsc *)",
+      "Bash(cd \"/c/Users/samsu/Desktop/projeto 5\" && ls node_modules/.bin/ 2>/dev/null | grep -i tsc; ls node_modules/typescript 2>/dev/null | head -3)",
+      "Bash(cd \"/c/Users/samsu/Desktop/projeto 5\" && cat package.json | grep -A5 '\"scripts\"')",
+      "Bash(npm run *)"
     ]
   }
 }

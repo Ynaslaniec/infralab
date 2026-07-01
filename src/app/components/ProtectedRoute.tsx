@@ -8,21 +8,20 @@ import type { AppRole } from '../hooks/useRole';
 export const HOME_BY_ROLE: Record<AppRole, string> = {
   Coordenador: '/dashboard',
   Professor:   '/dashboard',
-  Aluno:       '/dashboard',
   Técnico:     '/tickets',
 };
 
 // Rotas permitidas por role (undefined = todos os roles autenticados)
 const ALLOWED_ROLES: Record<string, AppRole[] | undefined> = {
-  '/dashboard':              ['Coordenador', 'Professor', 'Aluno'],
-  '/equipment':              ['Coordenador', 'Professor', 'Aluno'],
-  '/labs':                   ['Coordenador', 'Professor', 'Aluno'],
-  '/report':                 ['Coordenador', 'Professor', 'Aluno'],
-  '/appointments':           ['Coordenador', 'Professor', 'Aluno'],
-  '/notifications':          ['Coordenador', 'Professor', 'Aluno'],
+  '/dashboard':              ['Coordenador', 'Professor'],
+  '/equipment':              ['Coordenador', 'Professor'],
+  '/labs':                   ['Coordenador', 'Professor'],
+  '/report':                 ['Coordenador', 'Professor'],
+  '/appointments':           ['Coordenador', 'Professor'],
+  '/notifications':          ['Coordenador', 'Professor'],
   '/users':                  ['Coordenador'],
   '/infrastructure':         ['Coordenador'],
-  '/spaces':                 ['Coordenador', 'Professor', 'Aluno'],
+  '/spaces':                 ['Coordenador', 'Professor'],
   '/tickets':                undefined,   // todos
   '/profile':                undefined,   // todos
 };

@@ -151,13 +151,6 @@ export default function Infrastructure() {
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <h1 className="text-[20px] font-semibold text-foreground flex-1">Infraestrutura</h1>
-            <button
-              onClick={() => setFormTarget('new')}
-              className="flex items-center gap-1.5 px-3 py-2 text-white rounded-xl text-[13px] font-medium transition-colors"
-              style={{ backgroundColor: tab.accent }}
-            >
-              <Plus className="w-4 h-4" /> Novo
-            </button>
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-6 px-6">
@@ -236,6 +229,20 @@ export default function Infrastructure() {
             </div>
           ))
         )}
+      </div>
+
+      {/* Floating Action Button — Novo (item da aba ativa) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+        <div className="max-w-md mx-auto relative h-0">
+          <button
+            onClick={() => setFormTarget('new')}
+            aria-label="Novo"
+            style={{ backgroundColor: tab.accent }}
+            className="absolute bottom-24 right-6 w-14 h-14 rounded-full text-white shadow-lg flex items-center justify-center transition-colors pointer-events-auto hover:opacity-90"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
       </div>
     </div>
   );

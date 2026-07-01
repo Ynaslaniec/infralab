@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Bell, CheckCheck, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Bell, CheckCheck, ExternalLink, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import type { Notification } from '../../lib/supabase';
@@ -71,6 +71,12 @@ export default function Notifications() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }
 
+  async function clearAll() {
+    const { error } = await supabase.from('notifications').delete().eq('user_id', user!.id);
+    if (error) toast.error('Erro ao limpar notificações');
+    else setNotifications([]);
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border sticky top-0 z-40">
@@ -87,11 +93,18 @@ export default function Notifications() {
                 )}
               </div>
             </div>
-            {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="flex items-center gap-1.5 px-3 py-1.5 text-[14px] text-[#2563EB] font-medium">
-                <CheckCheck className="w-4 h-4" />
-                Marcar todas
-              </button>
+            {notifications.length > 0 && (
+              <div className="flex items-center gap-1">
+                {unreadCount > 0 && (
+                  <button onClick={markAllAsRead} className="flex items-center gap-1.5 px-3 py-1.5 text-[14px] text-[#2563EB] font-medium">
+                    <CheckCheck className="w-4 h-4" />
+                    Marcar todas
+                  </button>
+                )}
+                <button onClick={clearAll} className="p-2 rounded-xl hover:bg-[#DC2626]/10 text-[#DC2626] transition-colors" title="Limpar tudo">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
         </div>

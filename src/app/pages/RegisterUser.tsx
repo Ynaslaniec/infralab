@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft, UserPlus, Trash2, Eye, EyeOff,
-  AlertCircle, Search, RefreshCw,
+  AlertCircle, Search, RefreshCw, Loader2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { callManageUsers, Profile } from '../../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 
-const ROLES = ['Professor', 'Técnico', 'Aluno', 'Coordenador'];
+const ROLES = ['Professor', 'Técnico', 'Coordenador'];
 
 const ROLE_COLORS: Record<string, string> = {
   Coordenador: 'bg-[#7C3AED]/10 text-[#7C3AED]',
   Professor:   'bg-[#2563EB]/10 text-[#2563EB]',
   Técnico:     'bg-[#EAB308]/10 text-[#92400E]',
-  Aluno:       'bg-[#16A34A]/10 text-[#16A34A]',
 };
 
 const ROLE_DESC: Record<string, string> = {
   Coordenador: '⚠ Acesso total, incluindo cadastro de usuários.',
   Professor:   'Pode agendar equipamentos, reservar labs e abrir chamados.',
   Técnico:     'Pode gerenciar chamados e visualizar agendamentos.',
-  Aluno:       'Pode visualizar agendamentos e abrir chamados.',
 };
 
 type FormErrors = {
@@ -88,6 +86,7 @@ export default function RegisterUser() {
   const [search, setSearch]       = useState('');
   const [filterRole, setFilterRole] = useState('Todos');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Profile | null>(null);
 
   // Guard: apenas coordenador
   useEffect(() => {
@@ -139,13 +138,13 @@ export default function RegisterUser() {
     }
   }
 
-  async function handleDelete(userId: string, userName: string) {
-    if (!confirm(`Remover o usuário "${userName}"? Esta ação não pode ser desfeita.`)) return;
-    setDeletingId(userId);
+  async function handleDelete(target: Profile) {
+    setConfirmDelete(null);
+    setDeletingId(target.id);
     try {
-      await callManageUsers('DELETE', undefined, { user_id: userId });
-      toast.success(`"${userName}" removido`);
-      setUsers((p) => p.filter((u) => u.id !== userId));
+      await callManageUsers('DELETE', undefined, { user_id: target.id });
+      toast.success(`"${target.full_name}" removido`);
+      setUsers((p) => p.filter((u) => u.id !== target.id));
     } catch (e: any) {
       toast.error(e.message ?? 'Erro ao remover usuário');
     } finally {
@@ -162,6 +161,28 @@ export default function RegisterUser() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* Modal de confirmação de exclusão */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-sm bg-card rounded-2xl shadow-2xl p-5">
+            <h2 className="text-[17px] font-semibold text-foreground">Remover usuário?</h2>
+            <p className="text-[14px] text-muted-foreground mt-2">
+              Tem certeza que deseja remover <span className="text-foreground font-medium">{confirmDelete.full_name}</span>? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3 mt-5">
+              <button onClick={() => setConfirmDelete(null)}
+                className="flex-1 py-3 bg-accent hover:bg-accent/80 text-foreground rounded-xl font-medium transition-colors">
+                Cancelar
+              </button>
+              <button onClick={() => handleDelete(confirmDelete)}
+                className="flex-1 py-3 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl font-medium transition-colors">
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="max-w-md mx-auto px-6 py-4">
@@ -374,11 +395,11 @@ export default function RegisterUser() {
                             </span>
                             {u.id !== myProfile?.id && (
                               <button
-                                onClick={() => handleDelete(u.id, u.full_name)}
+                                onClick={() => setConfirmDelete(u)}
                                 disabled={deletingId === u.id}
                                 className="p-1.5 text-[#DC2626] hover:bg-[#DC2626]/10 rounded-lg transition-colors disabled:opacity-50">
                                 {deletingId === u.id
-                                  ? <div className="w-4 h-4 border-2 border-[#DC2626] border-t-transparent rounded-full animate-spin" />
+                                  ? <Loader2 className="w-4 h-4 animate-spin text-[#DC2626]" />
                                   : <Trash2 className="w-4 h-4" />}
                               </button>
                             )}

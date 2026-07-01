@@ -17,9 +17,9 @@ type SpaceKind = 'lab' | 'classroom' | 'auditorium';
 type Space = Lab | Classroom | Auditorium;
 
 const KIND_CONFIG: Record<SpaceKind, { table: string; label: string; backTo: string; accent: string; subjectLabel: string }> = {
-  lab:        { table: 'labs',        label: 'Laboratório',  backTo: '/labs',           accent: '#16A34A', subjectLabel: 'Disciplina/Atividade' },
-  classroom:  { table: 'classrooms',  label: 'Sala de Aula', backTo: '/infrastructure', accent: '#EA580C', subjectLabel: 'Disciplina/Atividade' },
-  auditorium: { table: 'auditoriums', label: 'Auditório',    backTo: '/infrastructure', accent: '#7C3AED', subjectLabel: 'Evento/Atividade' },
+  lab:        { table: 'labs',        label: 'Laboratório',  backTo: '/spaces', accent: '#16A34A', subjectLabel: 'Disciplina/Atividade' },
+  classroom:  { table: 'classrooms',  label: 'Sala de Aula', backTo: '/spaces', accent: '#EA580C', subjectLabel: 'Disciplina/Atividade' },
+  auditorium: { table: 'auditoriums', label: 'Auditório',    backTo: '/spaces', accent: '#7C3AED', subjectLabel: 'Evento/Atividade' },
 };
 
 function validate(

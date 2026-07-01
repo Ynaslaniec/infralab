@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Search, FlaskConical, DoorOpen, Theater, Users, Monitor, ChevronRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, Search, FlaskConical, DoorOpen, Theater, Users, Monitor, ChevronRight, Plus, X } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { supabase, Lab, Classroom, Auditorium } from '../../lib/supabase';
+import { useRole } from '../hooks/useRole';
+import { ResourceFormModal } from '../components/ResourceFormModal';
 import { toast } from 'sonner';
 
 type SpaceKind = 'lab' | 'classroom' | 'auditorium';
@@ -22,32 +24,64 @@ const FILTERS: { id: 'all' | SpaceKind; label: string }[] = [
 
 export default function Spaces() {
   const navigate = useNavigate();
+  const { isCoordenador } = useRole();
   const [spaces, setSpaces]   = useState<AnySpace[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState('');
   const [filter, setFilter]   = useState<'all' | SpaceKind>('all');
 
+  // ── Criação de novo local (Coordenador) ──────────────────────
+  const [kindMenuOpen, setKindMenuOpen] = useState(false);
+  const [creatingKind, setCreatingKind] = useState<SpaceKind | null>(null);
+  const kindMenuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    async function fetchAll() {
-      setLoading(true);
-      const [labs, classrooms, auditoriums] = await Promise.all([
-        supabase.from('labs').select('*'),
-        supabase.from('classrooms').select('*'),
-        supabase.from('auditoriums').select('*'),
-      ]);
-      if (labs.error || classrooms.error || auditoriums.error) {
-        toast.error('Erro ao carregar espaços disponíveis');
+    if (!kindMenuOpen) return;
+    function onClickOutside(e: MouseEvent) {
+      if (kindMenuRef.current && !kindMenuRef.current.contains(e.target as Node)) {
+        setKindMenuOpen(false);
       }
-      const merged: AnySpace[] = [
-        ...(labs.data ?? []).map(s => ({ ...s, kind: 'lab' as const })),
-        ...(classrooms.data ?? []).map(s => ({ ...s, kind: 'classroom' as const })),
-        ...(auditoriums.data ?? []).map(s => ({ ...s, kind: 'auditorium' as const })),
-      ].sort((a, b) => a.name.localeCompare(b.name));
-      setSpaces(merged);
-      setLoading(false);
     }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [kindMenuOpen]);
+
+  async function fetchAll() {
+    setLoading(true);
+    const [labs, classrooms, auditoriums] = await Promise.all([
+      supabase.from('labs').select('*'),
+      supabase.from('classrooms').select('*'),
+      supabase.from('auditoriums').select('*'),
+    ]);
+    if (labs.error || classrooms.error || auditoriums.error) {
+      toast.error('Erro ao carregar espaços disponíveis');
+    }
+    const merged: AnySpace[] = [
+      ...(labs.data ?? []).map(s => ({ ...s, kind: 'lab' as const })),
+      ...(classrooms.data ?? []).map(s => ({ ...s, kind: 'classroom' as const })),
+      ...(auditoriums.data ?? []).map(s => ({ ...s, kind: 'auditorium' as const })),
+    ].sort((a, b) => a.name.localeCompare(b.name));
+    setSpaces(merged);
+    setLoading(false);
+  }
+
+  useEffect(() => { fetchAll(); }, []);
+
+  async function handleCreateSpace(values: any) {
+    if (!creatingKind) return;
+    const table = KIND_CONFIG[creatingKind].table;
+    const { error } = await supabase.from(table).insert({
+      name: values.name,
+      capacity: values.capacity,
+      building: values.building,
+      equipment_list: values.equipment_list,
+      is_available: values.is_available,
+    });
+    if (error) throw new Error(`Não foi possível criar: ${KIND_CONFIG[creatingKind].label.slice(0, -1).toLowerCase()}.`);
+    toast.success(`${KIND_CONFIG[creatingKind].label.slice(0, -1)} criado(a) com sucesso!`);
+    setCreatingKind(null);
     fetchAll();
-  }, []);
+  }
 
   const filtered = spaces.filter((s) => {
     const matchKind = filter === 'all' || s.kind === filter;
@@ -58,6 +92,15 @@ export default function Spaces() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {creatingKind && (
+        <ResourceFormModal
+          kind={creatingKind}
+          initial={null}
+          onSubmit={handleCreateSpace}
+          onClose={() => setCreatingKind(null)}
+        />
+      )}
+
       <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="max-w-md mx-auto px-6 py-4">
           <div className="flex items-center gap-3 mb-4">
@@ -160,6 +203,44 @@ export default function Spaces() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button — Criar Local (somente Coordenador) */}
+      {isCoordenador && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+          <div className="max-w-md mx-auto relative h-0">
+            {kindMenuOpen && (
+              <div
+                ref={kindMenuRef}
+                className="absolute bottom-44 right-6 bg-card border border-border rounded-2xl shadow-2xl p-2 w-52 pointer-events-auto"
+              >
+                {(['lab', 'classroom', 'auditorium'] as SpaceKind[]).map((k) => {
+                  const cfg = KIND_CONFIG[k];
+                  const Icon = cfg.icon;
+                  return (
+                    <button
+                      key={k}
+                      onClick={() => { setCreatingKind(k); setKindMenuOpen(false); }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${cfg.accent}1A` }}>
+                        <Icon className="w-4 h-4" style={{ color: cfg.accent }} />
+                      </div>
+                      <span className="text-[14px] font-medium text-foreground">Novo(a) {cfg.label.slice(0, -1)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <button
+              onClick={() => setKindMenuOpen((v) => !v)}
+              aria-label="Criar novo local"
+              className="absolute bottom-24 right-6 w-14 h-14 rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white shadow-lg flex items-center justify-center transition-colors pointer-events-auto"
+            >
+              {kindMenuOpen ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

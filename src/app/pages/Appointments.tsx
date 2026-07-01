@@ -3,6 +3,8 @@ import { Calendar, Clock, Laptop, FlaskConical, ShieldOff, User, Users, MessageS
 import { useNavigate } from 'react-router';
 import { StatusBadge } from '../components/StatusBadge';
 import { CancelModal } from '../components/CancelModal';
+import { AppointmentDetailModal } from '../components/AppointmentDetailModal';
+import { NewAppointmentModal } from '../components/NewAppointmentModal';
 import { supabase, Appointment } from '../../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useRole } from '../hooks/useRole';
@@ -49,8 +51,7 @@ function AccessDenied() {
 
 // ─── Componente principal ──────────────────────────────────────
 export default function Appointments() {
-  const { user }   = useAuth();
-  const navigate   = useNavigate();
+  const { user } = useAuth();
   const { role, canSeeAllAppointments, canCancelAppointments, canAccessAppointments } = useRole();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -60,6 +61,8 @@ export default function Appointments() {
 
   // Modal state
   const [pendingCancel, setPendingCancel] = useState<Appointment | null>(null);
+  const [detailAppt,      setDetailAppt]      = useState<Appointment | null>(null);
+  const [showNewModal,    setShowNewModal]    = useState(false);
 
   if (!canAccessAppointments) return <AccessDenied />;
 
@@ -140,6 +143,19 @@ export default function Appointments() {
         />
       )}
 
+      {/* ── Modal de detalhes ────────────────────────────────── */}
+      {detailAppt && (
+        <AppointmentDetailModal
+          appointment={detailAppt}
+          onClose={() => setDetailAppt(null)}
+        />
+      )}
+
+      {/* ── Modal de novo agendamento ─────────────────────────── */}
+      {showNewModal && (
+        <NewAppointmentModal onClose={() => setShowNewModal(false)} />
+      )}
+
       <div className="min-h-screen bg-background pb-20">
         {/* Header */}
         <div className="bg-card border-b border-border sticky top-0 z-40">
@@ -154,14 +170,6 @@ export default function Appointments() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                {canAccessAppointments && role !== 'Técnico' && (
-                  <button
-                    onClick={() => navigate('/spaces')}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-[#2563EB] hover:bg-[#3B82F6] text-white rounded-xl text-[13px] font-medium transition-colors"
-                  >
-                    <Plus className="w-4 h-4" /> Novo Agendamento
-                  </button>
-                )}
                 <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
                   role === 'Coordenador' ? 'bg-[#7C3AED]/10 text-[#7C3AED]'
                   : 'bg-[#2563EB]/10 text-[#2563EB]'
@@ -281,20 +289,23 @@ export default function Appointments() {
                         </div>
                       )}
 
-                      {/* Ações (apenas agendamentos futuros) */}
-                      {a.status === 'upcoming' && canCancelAppointments && (
-                        <div className="flex gap-2 mt-3 pt-3 border-t border-border">
-                          <button className="flex-1 py-2 px-3 bg-accent text-foreground rounded-lg text-[14px] font-medium hover:bg-accent/80 transition-colors">
-                            Detalhes
-                          </button>
+                      {/* Ações */}
+                      <div className="flex gap-2 mt-3 pt-3 border-t border-border">
+                        <button
+                          onClick={() => setDetailAppt(a)}
+                          className="flex-1 py-2 px-3 bg-accent text-foreground rounded-lg text-[14px] font-medium hover:bg-accent/80 transition-colors"
+                        >
+                          Detalhes
+                        </button>
+                        {a.status === 'upcoming' && canCancelAppointments && (
                           <button
                             onClick={() => setPendingCancel(a)}
                             className="flex-1 py-2 px-3 bg-[#DC2626]/10 text-[#DC2626] rounded-lg text-[14px] font-medium hover:bg-[#DC2626]/20 transition-colors"
                           >
                             Cancelar
                           </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -303,6 +314,21 @@ export default function Appointments() {
           )}
         </div>
       </div>
+
+      {/* Floating Action Button — Novo Agendamento */}
+      {canAccessAppointments && role !== 'Técnico' && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+          <div className="max-w-md mx-auto relative h-0">
+            <button
+              onClick={() => setShowNewModal(true)}
+              aria-label="Novo Agendamento"
+              className="absolute bottom-24 right-6 w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#3B82F6] text-white shadow-lg flex items-center justify-center transition-colors pointer-events-auto"
+            >
+              <Plus className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

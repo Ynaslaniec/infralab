@@ -8,14 +8,14 @@ export function BottomNav() {
   const navigate = useNavigate();
   const { isCoordenador, isTecnico } = useRole();
 
-  // Técnico não vê Agendamentos; Coordenador vê aba Usuários extra
+  // Técnico não vê Agendamentos; Coordenador vê abas extras
   const tabs = [
-    { id: 'home',         label: 'Home',        icon: Home,        path: '/dashboard',    show: true },
-    { id: 'appointments', label: 'Agendamentos', icon: Calendar,    path: '/appointments', show: !isTecnico },
-    { id: 'tickets',      label: 'Chamados',     icon: AlertCircle, path: '/tickets',      show: true },
-    { id: 'infrastructure', label: 'Infraestrutura', icon: Building2, path: '/infrastructure', show: isCoordenador },
-    { id: 'users',        label: 'Usuários',     icon: Users,       path: '/users',        show: isCoordenador },
-    { id: 'profile',      label: 'Perfil',       icon: User,        path: '/profile',      show: true },
+    { id: 'home',           label: 'Home',          icon: Home,        path: '/dashboard',     show: !isTecnico },
+    { id: 'appointments',   label: 'Agendamentos',   icon: Calendar,    path: '/appointments',  show: !isTecnico },
+    { id: 'tickets',        label: 'Chamados',       icon: AlertCircle, path: '/tickets',       show: true },
+    { id: 'infrastructure', label: 'Infraestrutura', icon: Building2,   path: '/infrastructure', show: isCoordenador },
+    { id: 'users',          label: 'Usuários',       icon: Users,       path: '/users',         show: isCoordenador },
+    { id: 'profile',        label: 'Perfil',         icon: User,        path: '/profile',       show: true },
   ].filter((t) => t.show);
 
   return (

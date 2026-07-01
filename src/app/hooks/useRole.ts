@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 
-export type AppRole = 'Coordenador' | 'Professor' | 'Técnico' | 'Aluno';
+export type AppRole = 'Coordenador' | 'Professor' | 'Técnico';
 
 export function useRole() {
   const { profile } = useAuth();
@@ -11,7 +11,6 @@ export function useRole() {
     isCoordenador: role === 'Coordenador',
     isProfessor:   role === 'Professor',
     isTecnico:     role === 'Técnico',
-    isAluno:       role === 'Aluno',
     canSeeAllTickets:       role === 'Coordenador' || role === 'Técnico',
     canSeeAllAppointments:  role === 'Coordenador',
     canCancelAppointments:  role === 'Coordenador' || role === 'Professor',

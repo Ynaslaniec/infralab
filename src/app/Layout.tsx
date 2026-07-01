@@ -31,7 +31,7 @@ export default function Layout() {
   const location = useLocation();
 
   const showBottomNav = [
-    '/dashboard', '/appointments', '/tickets', '/profile', '/users',
+    '/dashboard', '/appointments', '/tickets', '/profile', '/users', '/infrastructure',
   ].includes(location.pathname);
 
   return (

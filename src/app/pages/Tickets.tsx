@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, CheckCircle2, Wrench, ChevronRight, Users, User, Plus, MessageCircle } from 'lucide-react';
+import { Clock, CheckCircle2, Wrench, Users, User, Plus, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { StatusBadge } from '../components/StatusBadge';
 import { supabase, Ticket } from '../../lib/supabase';
@@ -140,14 +140,6 @@ export default function Tickets() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {!isTecnico && (
-                <button
-                  onClick={() => navigate('/report')}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-[#2563EB] hover:bg-[#3B82F6] text-white rounded-xl text-[13px] font-medium transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> Relatar Problema
-                </button>
-              )}
               {/* Badge de role */}
               <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
                 role === 'Coordenador' ? 'bg-[#7C3AED]/10 text-[#7C3AED]'
@@ -239,12 +231,11 @@ export default function Tickets() {
                           )}
                         </div>
 
-                        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                        <div className="flex-shrink-0">
                           {ticket.status === 'pending'     && <StatusBadge status="pending">Pendente</StatusBadge>}
                           {ticket.status === 'in_progress' && <StatusBadge status="warning">Em andamento</StatusBadge>}
                           {ticket.status === 'resolved'    && <StatusBadge status="success">Resolvido</StatusBadge>}
                           {ticket.status === 'cancelled'   && <StatusBadge status="error">Cancelado</StatusBadge>}
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </div>
                       </div>
 
@@ -295,6 +286,21 @@ export default function Tickets() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button — Relatar Problema */}
+      {!isTecnico && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+          <div className="max-w-md mx-auto relative h-0">
+            <button
+              onClick={() => navigate('/report')}
+              aria-label="Relatar Problema"
+              className="absolute bottom-24 right-6 w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#3B82F6] text-white shadow-lg flex items-center justify-center transition-colors pointer-events-auto"
+            >
+              <Plus className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
